@@ -1,15 +1,16 @@
 import win32com.client
 import sys
 import decimal
-# from tkinter import messagebox
 from collections import namedtuple
-import os
 
 nameSheets = ('Результаты', 'Результаты2')
 
+
 def addRow(table, nodenumber, support, x, y, z, xo, yo, zo):
-    l = [nodenumber, support, decimal.Decimal(x), decimal.Decimal(y), decimal.Decimal(z), decimal.Decimal(xo), decimal.Decimal(yo), decimal.Decimal(zo)]
+    l = [nodenumber, support, decimal.Decimal(x), decimal.Decimal(y), decimal.Decimal(z), decimal.Decimal(xo),
+         decimal.Decimal(yo), decimal.Decimal(zo)]
     table.append(l)
+
 
 def mergeTable(table1: list, table2: list):
     result = []
@@ -22,33 +23,30 @@ def mergeTable(table1: list, table2: list):
         except:
             row.append(None)
     for row in table2:
-        table1.append([row[0], row[1], *[None for i in range(6)],row])
+        table1.append([row[0], row[1], *[None for i in range(6)], row])
+
 
 if len(sys.argv) < 2:
-    raise('Не указаны все аргументы! "имя файла 1" "имя файла 2"')
+    raise ('Не указаны все аргументы! "имя файла 1" "имя файла 2"')
 
+if sys.argv[0].find('/') >= 0:
+    sep = '/'
+else:
+    sep = '\\'
+curdir = sys.argv[0][:sys.argv[0].rfind(sep[0]) + 1]
 fileName1 = sys.argv[1]
 fileName2 = sys.argv[2]
-# curdir = sys.argv[0][:sys.argv[0].rfind('\\')+1]
-curdir = sys.argv[0][:sys.argv[0].rfind(os.sep)+1]
-print(sys.argv[0], curdir)
-# messagebox.showinfo('Сообщение', sys.argv[0])
 
-print(curdir+u'21_22.РР.12_Этап 3_2.xlsx')
-print(curdir+fileName1)
-print(curdir+fileName2)
 exApp = win32com.client.Dispatch("Excel.Application")
-wb = exApp.Workbooks.Open(curdir+u'21_22.РР.12_Этап 3_2.xlsx')
+wb = exApp.Workbooks.Open(curdir + fileName1)
 
-for sheet in  wb.Sheets:
+for sheet in wb.Sheets:
     if sheet.Name in nameSheets:
         # sheet = wb.Sheets("Результаты")
         sheet.Delete()
 
 sheet = wb.ActiveSheet
-val = sheet.Cells(3,1).Text
-print(val)
-# sheet.UsedRange.Columns[0].NumberFormat = "@"
+
 table1 = []
 i_header = 0
 for (row) in sheet.UsedRange.Rows:
@@ -59,7 +57,7 @@ for (row) in sheet.UsedRange.Rows:
         addRow(table1, *lrow[:-1])
     i_header += 1
 
-wb2 = exApp.Workbooks.Open(curdir+u'21_22.РР.12_без СКНР_2.xlsx')
+wb2 = exApp.Workbooks.Open(curdir + fileName2)
 
 sheet2 = wb2.ActiveSheet
 table2 = []
@@ -88,8 +86,8 @@ for row in table1:
             for item in cell:
                 if k > 1:
                     val = item
-                    newSheet.Cells(i, j+k).Value = val
-                    newSheet.Cells(i, j+k).NumberFormat = '0.00'
+                    newSheet.Cells(i, j + k).Value = val
+                    newSheet.Cells(i, j + k).NumberFormat = '0.00'
                 k += 1
         else:
             newSheet.Cells(i, j).Value = cell
@@ -110,11 +108,11 @@ tableDifference = []
 for row in table1:
     if (type(row[8]) is list) and row[2]:
         tableDifference.append([row[0], row[1],
-                    row[2]-row[8][2],
-                    row[3]-row[8][3],
-                    row[4]-row[8][4],
-                    row[5]-row[8][5],
-                    row[6]-row[8][6]])
+                                row[2] - row[8][2],
+                                row[3] - row[8][3],
+                                row[4] - row[8][4],
+                                row[5] - row[8][5],
+                                row[6] - row[8][6]])
 i = 3
 for row in tableDifference:
     sum = 0
@@ -162,7 +160,6 @@ for row in tableNewLine:
             newSheet.Cells(i, j).NumberFormat = '@'
         j += 1
     i += 1
-
 
 wb.Save()
 wb.Close()
